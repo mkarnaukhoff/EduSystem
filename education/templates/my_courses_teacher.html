@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Мои курсы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-chalkboard-user"></i> Мои курсы</h2>
+    <p class="text-muted">Курсы, которые вы ведёте</p>
+
+    {% if courses %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Код</th>
+                    <th>Название курса</th>
+                    <th>Часов</th>
+                    <th>Студентов</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>{{ course.code }}</td>
+                    <td>{{ course.name }}</td>
+                    <td>{{ course.hours }}</td>
+                    <td>{{ course.enrollments|selectattr("status", "equalto", "enrolled")|list|length }}</td>
+                    <td>{% if course.is_active %}Активен{% else %}Неактивен{% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('course_students', course_id=course.id) }}" class="btn-grade">
+                            <i class="fas fa-star"></i> Выставить оценки
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> У вас пока нет закреплённых курсов.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .btn-grade {
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+        color: #ffd700;
+        padding: 6px 14px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+        border: none;
+    }
+    .btn-grade:hover {
+        background: linear-gradient(135deg, #1b5e20 0%, #0d3b0f 100%);
+        color: #ffea80;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(46,125,50,0.3);
+    }
+</style>
+{% endblock %}

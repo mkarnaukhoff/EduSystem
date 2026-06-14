@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Студенты на курсе{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-users"></i> Курс: {{ course.name }}</h2>
+    <p class="text-muted">Преподаватель: {{ course.teacher_ref.full_name if course.teacher_ref else '—' }}</p>
+
+    <h4 class="mt-4">Список студентов</h4>
+
+    {% if students %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Студент</th>
+                    <th>Email</th>
+                    <th>Оценки</th>
+                    <th>Средний балл</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in students %}
+                <tr>
+                    <td>{{ item.student.id }}</td>
+                    <td>{{ item.student.full_name or item.student.username }}</td>
+                    <td>{{ item.student.email }}</td>
+                    <td>
+                        {% if item.grade_items %}
+                            <ul class="mb-0">
+                            {% for grade in item.grade_items %}
+                                <li>{{ grade.title }}: {{ grade.score }} баллов</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <span class="text-muted">Нет оценок</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.avg_grade %}
+                            <strong>{{ item.avg_grade }}</strong>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn-grade" data-bs-toggle="modal" data-bs-target="#gradeModal{{ item.student.id }}">
+                            <i class="fas fa-plus"></i> Выставить оценку
+                        </button>
+                        
+                        <!-- Modal для выставления оценки -->
+                        <div class="modal fade" id="gradeModal{{ item.student.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('save_grade') }}">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Выставить оценку</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="student_id" value="{{ item.student.id }}">
+                                            <input type="hidden" name="course_id" value="{{ course.id }}">
+                                            <div class="mb-3">
+                                                <label>Название работы/задания</label>
+                                                <input type="text" name="title" class="form-control" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label>Оценка (0-100)</label>
+                                                <input type="number" name="score" class="form-control" min="0" max="100" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                            <button type="submit" class="btn-grade">Сохранить</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> На этот курс пока никто не записался.
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('my_courses_teacher') }}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> Назад к моим курсам
+    </a>
+</div>
+
+<style>
+    .btn-grade {
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+        color: #ffd700;
+        padding: 6px 14px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-grade:hover {
+        background: linear-gradient(135deg, #1b5e20 0%, #0d3b0f 100%);
+        color: #ffea80;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(46,125,50,0.3);
+    }
+</style>
+{% endblock %}

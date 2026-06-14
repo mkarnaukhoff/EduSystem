@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Преподаватели{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-5">
+        <div class="col text-center">
+            <h2 class="section-title">Наши преподаватели</h2>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for teacher in teachers %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-chalkboard-user fa-3x" style="color: var(--primary-green);"></i>
+                    <h5 class="card-title mt-3">{{ teacher.full_name }}</h5>
+                    <p class="card-text">{{ teacher.bio[:120] }}{% if teacher.bio|length > 120 %}...{% endif %}</p>
+                    <p><i class="fas fa-envelope"></i> {{ teacher.email }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

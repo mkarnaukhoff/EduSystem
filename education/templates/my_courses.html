@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Мои курсы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-graduation-cap"></i> Мои курсы
+                </div>
+                <div class="card-body">
+                    {% if session.role == 'student' %}
+                        {% if enrollments %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>Код</th>
+                                            <th>Название курса</th>
+                                            <th>Преподаватель</th>
+                                            <th>Статус</th>
+                                            <th>Средний балл</th>
+                                            <th>Итоговая оценка</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for enrollment in enrollments %}
+                                            {% set total_score = namespace(value=0) %}
+                                            {% set total_weight = namespace(value=0) %}
+                                            {% for grade in enrollment.course.grade_items %}
+                                                {% if grade.student_id == session.user_id %}
+                                                    {% set total_score.value = total_score.value + grade.score * grade.weight %}
+                                                    {% set total_weight.value = total_weight.value + grade.weight %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% set avg = (total_score.value / total_weight.value)|round(1) if total_weight.value > 0 else 0 %}
+                                            {% if avg >= 85 %}
+                                                {% set letter = 'Отлично' %}
+                                            {% elif avg >= 70 %}
+                                                {% set letter = 'Хорошо' %}
+                                            {% elif avg >= 50 %}
+                                                {% set letter = 'Удовлетворительно' %}
+                                            {% else %}
+                                                {% set letter = 'Неудовлетворительно' %}
+                                            {% endif %}
+                                        <tr>
+                                            <td>{{ enrollment.course.code }}</td>
+                                            <td>{{ enrollment.course.name }}</td>
+                                            <td>{{ enrollment.course.teacher.full_name }}</td>
+                                            <td>
+                                                {% if enrollment.status == 'enrolled' %}
+                                                    <span class="badge bg-success">Записан</span>
+                                                {% elif enrollment.status == 'completed' %}
+                                                    <span class="badge bg-primary">Завершен</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ enrollment.status }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ avg if avg > 0 else '-' }} баллов</td>
+                                            <td><strong>{{ letter if avg > 0 else '-' }}</strong></td>
+                                            <td>
+                                                <a href="{{ url_for('course_detail', course_id=enrollment.course.id) }}" class="btn btn-sm btn-primary">Перейти</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle"></i> Вы пока не записаны ни на один курс
+                            </div>
+                        {% endif %}
+                    
+                    {% elif session.role == 'teacher' %}
+                        {% if courses %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>Код</th>
+                                            <th>Название курса</th>
+                                            <th>Часов</th>
+                                            <th>Студентов</th>
+                                            <th>Статус</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for course in courses %}
+                                        <tr>
+                                            <td>{{ course.code }}</td>
+                                            <td>{{ course.name }}</td>
+                                            <td>{{ course.hours }}</td>
+                                            <td>{{ course.enrollments|length }}</td>
+                                            <td>
+                                                {% if course.is_active %}
+                                                    <span class="badge bg-success">Активен</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Неактивен</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Управление</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle"></i> У вас пока нет курсов
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

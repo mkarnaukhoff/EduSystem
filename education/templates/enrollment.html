@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Запись на курс{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Запись на курс: {{ course.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Код курса:</strong> {{ course.code }}<br>
+                        <strong>Преподаватель:</strong> {{ course.teacher.full_name }}<br>
+                        <strong>Кредиты:</strong> {{ course.credits }} | <strong>Часов:</strong> {{ course.hours }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Описание курса</h5>
+                        <p>{{ course.description }}</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        После подтверждения записи вы получите доступ ко всем материалам курса.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-check"></i> Подтвердить запись
+                            </button>
+                            <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-secondary px-4">
+                                <i class="fas fa-arrow-left"></i> Назад
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

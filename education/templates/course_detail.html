@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{{ course.code }} - {{ course.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><i class="fas fa-chalkboard-user"></i> <strong>Преподаватель:</strong> {{ course.teacher.full_name }}</p>
+                            <p><i class="fas fa-clock"></i> <strong>Часов:</strong> {{ course.hours }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><i class="fas fa-calendar"></i> <strong>Статус:</strong> <span class="badge bg-success">Активен</span></p>
+                        </div>
+                    </div>
+                    
+                    <h5>Описание курса</h5>
+                    <p>{{ course.description }}</p>
+                    
+                    {% if session.user_id and session.role == 'student' %}
+                        {% if is_enrolled %}
+                            <!-- Таблица с оценками -->
+                            <div class="mt-4">
+                                <h5><i class="fas fa-star"></i> Мои оценки</h5>
+                                {% if grade_items %}
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-success">
+                                                <tr>
+                                                    <th>Работа</th>
+                                                    <th>Баллы</th>
+                                                    <th>Дата</th>
+                                                    <th>Преподаватель</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in grade_items %}
+                                                <tr>
+                                                    <td>{{ item.title }}</td>
+                                                    <td>{{ item.score }} баллов</td>
+                                                    <td>{{ item.graded_at.strftime('%d.%m.%Y') }}</td>
+                                                    <td>{{ item.teacher.full_name if item.teacher else '-' }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <strong>Итоговая оценка:</strong> {{ final_grade }} ({{ final_letter }})
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-info-circle"></i> У вас пока нет оценок по этому курсу
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning text-center">
+                                <i class="fas fa-exclamation-triangle"></i> Вы не записаны на этот курс
+                            </div>
+                            <form method="POST" action="{{ url_for('enroll', course_id=course.id) }}">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-sign-in-alt"></i> Записаться на курс
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% elif not session.user_id %}
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-exclamation-triangle"></i> Для просмотра оценок необходимо <a href="{{ url_for('login') }}">войти в систему</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

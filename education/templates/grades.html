@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Мои оценки{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-star"></i> Мои оценки
+                </div>
+                <div class="card-body">
+                    {% if grade_items %}
+                        <!-- Сводка по курсам -->
+                        <h5>Сводка по курсам</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Курс</th>
+                                        <th>Средний балл</th>
+                                        <th>Итоговая оценка</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for course_id, data in course_summary.items() %}
+                                    <tr>
+                                        <td>{{ data.course.name }}</td>
+                                        <td>{{ data.avg }} баллов</td>
+                                        <td>
+                                            <strong>
+                                            {% if data.avg >= 85 %}
+                                                Отлично
+                                            {% elif data.avg >= 70 %}
+                                                Хорошо
+                                            {% elif data.avg >= 50 %}
+                                                Удовлетворительно
+                                            {% else %}
+                                                Неудовлетворительно
+                                            {% endif %}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('course_detail', course_id=course_id) }}" class="btn btn-sm btn-primary">Перейти к курсу</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Детальные оценки -->
+                        <h5>Детальные оценки по работам</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Курс</th>
+                                        <th>Работа</th>
+                                        <th>Баллы</th>
+                                        <th>Дата</th>
+                                        <th>Преподаватель</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in grade_items %}
+                                    <tr>
+                                        <td>{{ item.course.name }}</td>
+                                        <td>{{ item.title }}</td>
+                                        <td><strong>{{ item.score }}</strong> баллов</td>
+                                        <td>{{ item.graded_at.strftime('%d.%m.%Y') }}</td>
+                                        <td>{{ item.teacher.full_name if item.teacher else '-' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> У вас пока нет оценок
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

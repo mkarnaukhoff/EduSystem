@@ -1,0 +1,392 @@
+:root {
+    --primary-green: #2D6A4F;
+    --dark-green: #1B4332;
+    --light-green: #40916C;
+    --gold: #D4AF37;
+    --light-gold: #F4E4B6;
+    --cream: #F4F9F4;
+    --white: #FFFFFF;
+    --gray-light: #E9ECEF;
+    --gray-dark: #6C757D;
+    --text-dark: #1B4332;
+    --text-muted: #5A6B5C;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--cream);
+    color: var(--text-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Навигация */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 0.8rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--gold) !important;
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    transition: all 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--gold) !important;
+    transform: translateY(-2px);
+}
+
+/* Герой секция */
+.hero {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--light-green) 100%);
+    padding: 80px 0;
+    margin-bottom: 40px;
+    text-align: center;
+    color: white;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.hero .lead {
+    font-size: 1.2rem;
+    opacity: 0.95;
+}
+
+/* Карточки */
+.card {
+    background: var(--white);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    background: var(--primary-green);
+    color: white;
+    border-bottom: 3px solid var(--gold);
+    padding: 1rem;
+}
+
+.card-title {
+    color: var(--primary-green);
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+/* Кнопки */
+.btn-primary {
+    background: var(--primary-green);
+    border: none;
+    transition: all 0.3s;
+    padding: 0.5rem 1.25rem;
+}
+
+.btn-primary:hover {
+    background: var(--dark-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(45,106,79,0.3);
+}
+
+.btn-gold {
+    background: var(--gold);
+    color: var(--dark-green);
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-gold:hover {
+    background: #c4a02a;
+    color: var(--dark-green);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+/* Формы */
+.form-control, .form-select {
+    background: var(--white);
+    border: 1px solid var(--gray-light);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.2);
+    outline: none;
+}
+
+/* Таблицы */
+.table {
+    background: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background: var(--primary-green);
+    color: white;
+    border-bottom: none;
+    padding: 0.75rem;
+}
+
+.table tbody tr:hover {
+    background: rgba(45,106,79,0.05);
+}
+
+/* Статусы */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.badge-enrolled {
+    background: var(--primary-green);
+    color: white;
+}
+
+.badge-completed {
+    background: var(--gold);
+    color: var(--dark-green);
+}
+
+.badge-dropped {
+    background: var(--gray-dark);
+    color: white;
+}
+
+/* Оценки */
+.grade-A { color: var(--primary-green); font-weight: bold; }
+.grade-B { color: var(--light-green); font-weight: bold; }
+.grade-C { color: var(--gold); font-weight: bold; }
+.grade-D { color: #E6A017; font-weight: bold; }
+.grade-F { color: #DC3545; font-weight: bold; }
+
+/* Футер */
+.footer {
+    background: var(--dark-green);
+    color: white;
+    padding: 40px 0 20px;
+    margin-top: 50px;
+}
+
+.footer a {
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: var(--light-gold);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .hero .lead { font-size: 1rem; }
+    .container { padding: 0 15px; }
+}
+
+/* Сноски для ширины */
+.review-stars i {
+    font-size: 0.9rem;
+    margin-right: 2px;
+    color: var(--gold);
+}
+
+/* Админ панель - светлый текст */
+.table-dark {
+    color: #fff !important;
+    background-color: #1a1a1a !important;
+}
+
+.table-dark thead th {
+    background-color: #2D6A4F !important;
+    color: #fff !important;
+}
+
+.table-dark tbody tr:hover {
+    background-color: #2a2a2a !important;
+}
+
+.table-dark td, .table-dark th {
+    color: #fff !important;
+}
+
+/* Модальные окна в админке */
+.modal-content.bg-dark {
+    background-color: #2a2a2a !important;
+    color: #fff !important;
+}
+
+.modal-content.bg-dark .form-control,
+.modal-content.bg-dark .form-select {
+    background-color: #3a3a3a !important;
+    color: #fff !important;
+    border-color: #2D6A4F !important;
+}
+
+.modal-content.bg-dark .btn-close-white {
+    filter: invert(1);
+}
+
+/* Ссылки в админке */
+.list-group-item {
+    background-color: #2a2a2a !important;
+    color: #e0e0e0 !important;
+    border-color: #3a3a3a !important;
+}
+
+.list-group-item:hover {
+    background-color: #3a3a3a !important;
+    color: #D4AF37 !important;
+}
+
+.list-group-item.active {
+    background-color: #2D6A4F !important;
+    color: #fff !important;
+}
+
+/* Таблицы в админке - светлая тема */
+.table-bordered {
+    background-color: #fff !important;
+    color: #212529 !important;
+}
+
+.table-bordered thead th {
+    background-color: #2D6A4F !important;
+    color: #fff !important;
+}
+
+.table-bordered tbody tr:hover {
+    background-color: #f5f5f5 !important;
+}
+
+.table-bordered td, .table-bordered th {
+    border-color: #dee2e6 !important;
+}
+
+/* Кнопки в админке */
+.btn-primary {
+    background-color: #2D6A4F;
+    border-color: #2D6A4F;
+}
+
+.btn-primary:hover {
+    background-color: #1B4332;
+    border-color: #1B4332;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Убираем лишний отступ у hero-секции */
+.hero {
+    margin-top: 0;
+    padding-top: 60px;
+}
+
+/* Карточки курсов одинаковой высоты */
+.course-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.course-card .card-footer {
+    margin-top: auto;
+    background: transparent;
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Зелёно-золотая тема для ссылок на курсы в расписании */
+.table a.course-link {
+    color: #8B6914;
+    text-decoration: none;
+    font-weight: 600;
+    background: linear-gradient(135deg, #f9f6e8 0%, #fff8e7 100%);
+    padding: 6px 14px;
+    border-radius: 30px;
+    display: inline-block;
+    transition: all 0.2s ease;
+    border-left: 3px solid #2e7d32;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.table a.course-link:hover {
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    color: #ffd700;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(46,125,50,0.2);
+    border-left-color: #ffd700;
+}
+
+.table a.course-link:active {
+    transform: translateY(0);
+}

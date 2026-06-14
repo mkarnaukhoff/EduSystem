@@ -1,0 +1,667 @@
+{% extends "base.html" %}
+
+{% block title %}Админ панель{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Боковое меню -->
+        <div class="col-md-2">
+            <div class="list-group">
+                <a href="?section=dashboard" class="list-group-item list-group-item-action {% if section == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Дашборд
+                </a>
+                <a href="?section=users" class="list-group-item list-group-item-action {% if section == 'users' or section == 'edit_user' %}active{% endif %}">
+                    <i class="fas fa-users"></i> Пользователи
+                </a>
+                <a href="?section=courses" class="list-group-item list-group-item-action {% if section == 'courses' or section == 'edit_course' %}active{% endif %}">
+                    <i class="fas fa-book"></i> Курсы
+                </a>
+                <a href="?section=teachers" class="list-group-item list-group-item-action {% if section == 'teachers' or section == 'edit_teacher' %}active{% endif %}">
+                    <i class="fas fa-chalkboard-user"></i> Преподаватели
+                </a>
+                <a href="?section=enrollments" class="list-group-item list-group-item-action {% if section == 'enrollments' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap"></i> Записи
+                </a>
+                <a href="?section=announcements" class="list-group-item list-group-item-action {% if section == 'announcements' or section == 'edit_announcement' %}active{% endif %}">
+                    <i class="fas fa-bullhorn"></i> Объявления
+                </a>
+                <a href="?section=schedule" class="list-group-item list-group-item-action {% if section == 'schedule' or section == 'edit_schedule' %}active{% endif %}">
+                    <i class="fas fa-calendar-alt"></i> Расписание
+                </a>
+            </div>
+        </div>
+        
+        <!-- Основной контент -->
+        <div class="col-md-10">
+            
+            <!-- DASHBOARD -->
+            {% if section == 'dashboard' %}
+                <h2><i class="fas fa-tachometer-alt"></i> Панель управления</h2>
+                <div class="row mt-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5>Студенты</h5>
+                                <h2>{{ stats.total_students }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5>Преподаватели</h5>
+                                <h2>{{ stats.total_teachers }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5>Курсы</h5>
+                                <h2>{{ stats.total_courses }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5>Записей на курсы</h5>
+                                <h2>{{ stats.total_enrollments }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- USERS LIST -->
+            {% elif section == 'users' %}
+                <h2><i class="fas fa-users"></i> Пользователи</h2>
+                <div class="table-responsive mt-3">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя пользователя</th>
+                                <th>Email</th>
+                                <th>ФИО</th>
+                                <th>Роль</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.full_name or '-' }}</td>
+                                <td>{{ user.role }}</td>
+                                <td>{% if user.is_active %}Активен{% else %}Неактивен{% endif %}</td>
+                                <td>
+                                    <a href="?section=edit_user&id={{ user.id }}" class="btn btn-sm btn-primary">Ред.</a>
+                                    <form method="POST" action="{{ url_for('admin_action', action='delete', entity='user') }}" style="display:inline;">
+                                        <input type="hidden" name="id" value="{{ user.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить пользователя?')">Уд.</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            
+            <!-- EDIT USER -->
+            {% elif section == 'edit_user' and edit_item %}
+                <h2><i class="fas fa-user-edit"></i> Редактировать пользователя</h2>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_action', action='edit', entity='user') }}">
+                            <input type="hidden" name="id" value="{{ edit_item.id }}">
+                            <div class="mb-3">
+                                <label>Имя пользователя</label>
+                                <input type="text" class="form-control" value="{{ edit_item.username }}" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" class="form-control" value="{{ edit_item.email }}" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label>ФИО</label>
+                                <input type="text" name="full_name" class="form-control" value="{{ edit_item.full_name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Телефон</label>
+                                <input type="text" name="phone" class="form-control" value="{{ edit_item.phone }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Роль</label>
+                                <select name="role" class="form-control">
+                                    <option value="student" {% if edit_item.role == 'student' %}selected{% endif %}>Студент</option>
+                                    <option value="teacher" {% if edit_item.role == 'teacher' %}selected{% endif %}>Преподаватель</option>
+                                    <option value="admin" {% if edit_item.role == 'admin' %}selected{% endif %}>Администратор</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <input type="checkbox" name="is_active" id="is_active" {% if edit_item.is_active %}checked{% endif %}>
+                                <label for="is_active"> Активен</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="?section=users" class="btn btn-secondary">Отмена</a>
+                        </form>
+                    </div>
+                </div>
+            
+            <!-- COURSES LIST -->
+            {% elif section == 'courses' %}
+                <div class="d-flex justify-content-between mb-3">
+                    <h2><i class="fas fa-book"></i> Курсы</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">+ Добавить курс</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Код</th>
+                                <th>Название</th>
+                                <th>Часов</th>
+                                <th>Преподаватель</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %}
+                            <tr>
+                                <td>{{ course.id }}</td>
+                                <td>{{ course.code }}</td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.hours }}</td>
+                                <td>{{ course.teacher_ref.full_name if course.teacher_ref else '-' }}</td>
+                                <td>{% if course.is_active %}Активен{% else %}Неактивен{% endif %}</td>
+                                <td>
+                                    <a href="?section=edit_course&id={{ course.id }}" class="btn btn-sm btn-primary">Ред.</a>
+                                    <form method="POST" action="{{ url_for('admin_action', action='delete', entity='course') }}" style="display:inline;">
+                                        <input type="hidden" name="id" value="{{ course.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить курс?')">Уд.</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Add Course -->
+                <div class="modal fade" id="addCourseModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark">
+                            <form method="POST" action="{{ url_for('admin_action', action='add', entity='course') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Добавить курс</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Код курса</label>
+                                        <input type="text" name="code" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Название</label>
+                                        <input type="text" name="name" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Описание</label>
+                                        <textarea name="description" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Часы</label>
+                                            <input type="number" name="hours" class="form-control" value="36">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Преподаватель</label>
+                                        <select name="teacher_id" class="form-select">
+                                            {% for teacher in teachers %}
+                                                <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="checkbox" name="is_active" checked> Активен
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Добавить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- ENROLLMENTS LIST -->
+            {% elif section == 'enrollments' %}
+                <h2><i class="fas fa-graduation-cap"></i> Записи на курсы</h2>
+                <div class="table-responsive mt-3">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Студент</th>
+                                <th>Курс</th>
+                                <th>Дата записи</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enrollment in enrollments %}
+                            <tr>
+                                <td>{{ enrollment.id }}</td>
+                                <td>{{ enrollment.student.full_name or enrollment.student.username }}</td>
+                                <td>{{ enrollment.course.name }}</td>
+                                <td>{{ enrollment.enrollment_date.strftime('%d.%m.%Y') }}</td>
+                                <td>{{ enrollment.status }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_action', action='update_status', entity='enrollment') }}">
+                                        <input type="hidden" name="id" value="{{ enrollment.id }}">
+                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option value="enrolled" {% if enrollment.status == 'enrolled' %}selected{% endif %}>Записан</option>
+                                            <option value="completed" {% if enrollment.status == 'completed' %}selected{% endif %}>Завершен</option>
+                                            <option value="dropped" {% if enrollment.status == 'dropped' %}selected{% endif %}>Отчислен</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            
+            <!-- TEACHERS LIST -->
+            {% elif section == 'teachers' %}
+                <div class="d-flex justify-content-between mb-3">
+                    <h2><i class="fas fa-chalkboard-user"></i> Преподаватели</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">+ Добавить преподавателя</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ФИО</th>
+                                <th>Email</th>
+                                <th>Биография</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for teacher in teachers %}
+                            <tr>
+                                <td>{{ teacher.id }}</td>
+                                <td>{{ teacher.full_name }}</td>
+                                <td>{{ teacher.email }}</td>
+                                <td>{{ teacher.bio[:50] if teacher.bio else '-' }}...</td>
+                                <td>
+                                    <a href="?section=edit_teacher&id={{ teacher.id }}" class="btn btn-sm btn-primary">Ред.</a>
+                                    <form method="POST" action="{{ url_for('admin_action', action='delete', entity='teacher') }}" style="display:inline;">
+                                        <input type="hidden" name="id" value="{{ teacher.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить преподавателя?')">Уд.</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Add Teacher -->
+                <div class="modal fade" id="addTeacherModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark">
+                            <form method="POST" action="{{ url_for('admin_action', action='add', entity='teacher') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Добавить преподавателя</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Имя пользователя</label>
+                                        <input type="text" name="username" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Email</label>
+                                        <input type="email" name="email" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>ФИО</label>
+                                        <input type="text" name="full_name" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Биография</label>
+                                        <textarea name="bio" class="form-control" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Телефон</label>
+                                        <input type="text" name="phone" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Добавить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- EDIT TEACHER -->
+            {% elif section == 'edit_teacher' and edit_item %}
+                <h2><i class="fas fa-user-edit"></i> Редактировать преподавателя</h2>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_action', action='edit', entity='teacher') }}">
+                            <input type="hidden" name="id" value="{{ edit_item.id }}">
+                            <div class="mb-3">
+                                <label>ФИО</label>
+                                <input type="text" name="full_name" class="form-control" value="{{ edit_item.full_name }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ edit_item.email }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Телефон</label>
+                                <input type="text" name="phone" class="form-control" value="{{ edit_item.phone }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Биография</label>
+                                <textarea name="bio" class="form-control" rows="4">{{ edit_item.bio }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="?section=teachers" class="btn btn-secondary">Отмена</a>
+                        </form>
+                    </div>
+                </div>
+            
+            <!-- ANNOUNCEMENTS LIST -->
+            {% elif section == 'announcements' %}
+                <div class="d-flex justify-content-between mb-3">
+                    <h2><i class="fas fa-bullhorn"></i> Объявления</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAnnouncementModal">+ Добавить объявление</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Заголовок</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for announcement in announcements %}
+                            <tr>
+                                <td>{{ announcement.id }}</td>
+                                <td>{{ announcement.title }}</td>
+                                <td>{{ announcement.created_at.strftime('%d.%m.%Y') }}</td>
+                                <td>{% if announcement.is_published %}Опубликовано{% else %}Черновик{% endif %}</td>
+                                <td>
+                                    <a href="?section=edit_announcement&id={{ announcement.id }}" class="btn btn-sm btn-primary">Ред.</a>
+                                    <form method="POST" action="{{ url_for('admin_action', action='delete', entity='announcement') }}" style="display:inline;">
+                                        <input type="hidden" name="id" value="{{ announcement.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить объявление?')">Уд.</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Add Announcement -->
+                <div class="modal fade" id="addAnnouncementModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark">
+                            <form method="POST" action="{{ url_for('admin_action', action='add', entity='announcement') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Добавить объявление</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Заголовок</label>
+                                        <input type="text" name="title" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Содержание</label>
+                                        <textarea name="content" class="form-control" rows="5" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="checkbox" name="is_published" checked> Опубликовать сразу
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Добавить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- EDIT ANNOUNCEMENT -->
+            {% elif section == 'edit_announcement' and edit_item %}
+                <h2><i class="fas fa-edit"></i> Редактировать объявление</h2>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_action', action='edit', entity='announcement') }}">
+                            <input type="hidden" name="id" value="{{ edit_item.id }}">
+                            <div class="mb-3">
+                                <label>Заголовок</label>
+                                <input type="text" name="title" class="form-control" value="{{ edit_item.title }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Содержание</label>
+                                <textarea name="content" class="form-control" rows="5" required>{{ edit_item.content }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <input type="checkbox" name="is_published" id="is_published" {% if edit_item.is_published %}checked{% endif %}>
+                                <label for="is_published"> Опубликовано</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="?section=announcements" class="btn btn-secondary">Отмена</a>
+                        </form>
+                    </div>
+                </div>
+            
+            <!-- SCHEDULE LIST -->
+            {% elif section == 'schedule' %}
+                <div class="d-flex justify-content-between mb-3">
+                    <h2><i class="fas fa-calendar-alt"></i> Расписание</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Добавить занятие</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Курс</th>
+                                <th>День</th>
+                                <th>Время</th>
+                                <th>Аудитория</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in schedule %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.course_ref.name if item.course_ref else '-' }}</td>
+                                <td>{{ item.day_of_week }}</td>
+                                <td>{{ item.start_time }} - {{ item.end_time }}</td>
+                                <td>{{ item.room }}</td>
+                                <td>
+                                    <a href="?section=edit_schedule&id={{ item.id }}" class="btn btn-sm btn-primary">Ред.</a>
+                                    <form method="POST" action="{{ url_for('admin_action', action='delete', entity='schedule') }}" style="display:inline;">
+                                        <input type="hidden" name="id" value="{{ item.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить занятие?')">Уд.</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Add Schedule -->
+                <div class="modal fade" id="addScheduleModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark">
+                            <form method="POST" action="{{ url_for('admin_action', action='add', entity='schedule') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Добавить занятие</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Курс</label>
+                                        <select name="course_id" class="form-select">
+                                            {% for course in courses %}
+                                                <option value="{{ course.id }}">{{ course.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>День недели</label>
+                                        <select name="day_of_week" class="form-select">
+                                            <option value="Понедельник">Понедельник</option>
+                                            <option value="Вторник">Вторник</option>
+                                            <option value="Среда">Среда</option>
+                                            <option value="Четверг">Четверг</option>
+                                            <option value="Пятница">Пятница</option>
+                                            <option value="Суббота">Суббота</option>
+                                        </select>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Начало</label>
+                                            <input type="time" name="start_time" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label>Конец</label>
+                                            <input type="time" name="end_time" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Аудитория</label>
+                                        <input type="text" name="room" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Добавить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            
+            <!-- EDIT SCHEDULE -->
+            {% elif section == 'edit_schedule' and edit_item %}
+                <h2><i class="fas fa-edit"></i> Редактировать занятие</h2>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_action', action='edit', entity='schedule') }}">
+                            <input type="hidden" name="id" value="{{ edit_item.id }}">
+                            <div class="mb-3">
+                                <label>Курс</label>
+                                <select name="course_id" class="form-select">
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}" {% if course.id == edit_item.course_id %}selected{% endif %}>{{ course.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>День недели</label>
+                                <select name="day_of_week" class="form-select">
+                                    <option value="Понедельник" {% if edit_item.day_of_week == 'Понедельник' %}selected{% endif %}>Понедельник</option>
+                                    <option value="Вторник" {% if edit_item.day_of_week == 'Вторник' %}selected{% endif %}>Вторник</option>
+                                    <option value="Среда" {% if edit_item.day_of_week == 'Среда' %}selected{% endif %}>Среда</option>
+                                    <option value="Четверг" {% if edit_item.day_of_week == 'Четверг' %}selected{% endif %}>Четверг</option>
+                                    <option value="Пятница" {% if edit_item.day_of_week == 'Пятница' %}selected{% endif %}>Пятница</option>
+                                    <option value="Суббота" {% if edit_item.day_of_week == 'Суббота' %}selected{% endif %}>Суббота</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Начало</label>
+                                    <input type="time" name="start_time" class="form-control" value="{{ edit_item.start_time }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Конец</label>
+                                    <input type="time" name="end_time" class="form-control" value="{{ edit_item.end_time }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Аудитория</label>
+                                <input type="text" name="room" class="form-control" value="{{ edit_item.room }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="?section=schedule" class="btn btn-secondary">Отмена</a>
+                        </form>
+                    </div>
+                </div>
+            
+            <!-- EDIT COURSE -->
+            {% elif section == 'edit_course' and edit_item %}
+                <h2><i class="fas fa-edit"></i> Редактировать курс</h2>
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('admin_action', action='edit', entity='course') }}">
+                            <input type="hidden" name="id" value="{{ edit_item.id }}">
+                            <div class="mb-3">
+                                <label>Код курса</label>
+                                <input type="text" name="code" value="{{ edit_item.code }}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Название</label>
+                                <input type="text" name="name" value="{{ edit_item.name }}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Описание</label>
+                                <textarea name="description" class="form-control" rows="3">{{ edit_item.description }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Часы</label>
+                                <input type="number" name="hours" value="{{ edit_item.hours }}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>Преподаватель</label>
+                                <select name="teacher_id" class="form-select">
+                                    {% for teacher in teachers %}
+                                        <option value="{{ teacher.id }}" {% if teacher.id == edit_item.teacher_id %}selected{% endif %}>{{ teacher.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <input type="checkbox" name="is_active" id="is_active" {% if edit_item.is_active %}checked{% endif %}>
+                                <label for="is_active"> Активен</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <a href="?section=courses" class="btn btn-secondary">Отмена</a>
+                        </form>
+                    </div>
+                </div>
+            
+            <!-- EMPTY STATE -->
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Выберите раздел из меню
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

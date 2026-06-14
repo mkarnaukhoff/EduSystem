@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Вход' if action == 'login' else 'Регистрация' }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{{ 'sign-in-alt' if action == 'login' else 'user-plus' }}"></i>
+                        {{ 'Вход в систему' if action == 'login' else 'Регистрация' }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% if action == 'register' %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Имя пользователя *</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Полное имя *</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль *</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <small class="text-muted">Минимум 6 символов</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Подтверждение пароля *</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        {% endif %}
+                        
+                        {% if action == 'login' %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Имя пользователя</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        {% endif %}
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            {{ 'Войти' if action == 'login' else 'Зарегистрироваться' }}
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    {% if action == 'login' %}
+                        <a href="{{ url_for('register') }}" class="text-decoration-none">Нет аккаунта? Зарегистрируйтесь</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="text-decoration-none">Уже есть аккаунт? Войдите</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const password = document.getElementById('password');
+        const confirm = document.getElementById('confirm_password');
+        
+        if (password && confirm) {
+            function checkMatch() {
+                if (password.value !== confirm.value) {
+                    confirm.setCustomValidity('Пароли не совпадают');
+                } else {
+                    confirm.setCustomValidity('');
+                }
+            }
+            password.addEventListener('input', checkMatch);
+            confirm.addEventListener('input', checkMatch);
+        }
+    });
+</script>
+{% endblock %}
