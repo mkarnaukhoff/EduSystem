@@ -12,7 +12,7 @@
                 </div>
                 <div class="card-body">
                     {% if session.role == 'student' %}
-                        {% if enrollments %}
+                        {% if courses_data %}
                             <div class="table-responsive">
                                 <table class="table table-bordered">
                                     <thead class="table-success">
@@ -27,42 +27,30 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for enrollment in enrollments %}
-                                            {% set total_score = namespace(value=0) %}
-                                            {% set total_weight = namespace(value=0) %}
-                                            {% for grade in enrollment.course.grade_items %}
-                                                {% if grade.student_id == session.user_id %}
-                                                    {% set total_score.value = total_score.value + grade.score * grade.weight %}
-                                                    {% set total_weight.value = total_weight.value + grade.weight %}
-                                                {% endif %}
-                                            {% endfor %}
-                                            {% set avg = (total_score.value / total_weight.value)|round(1) if total_weight.value > 0 else 0 %}
-                                            {% if avg >= 85 %}
-                                                {% set letter = 'Отлично' %}
-                                            {% elif avg >= 70 %}
-                                                {% set letter = 'Хорошо' %}
-                                            {% elif avg >= 50 %}
-                                                {% set letter = 'Удовлетворительно' %}
-                                            {% else %}
-                                                {% set letter = 'Неудовлетворительно' %}
-                                            {% endif %}
+                                        {% for data in courses_data %}
                                         <tr>
-                                            <td>{{ enrollment.course.code }}</td>
-                                            <td>{{ enrollment.course.name }}</td>
-                                            <td>{{ enrollment.course.teacher.full_name }}</td>
+                                            <td>{{ data.course.code }}</td>
+                                            <td>{{ data.course.name }}</td>
+                                            <td>{{ data.teacher_name }}</td>
                                             <td>
-                                                {% if enrollment.status == 'enrolled' %}
+                                                {% if data.enrollment.status == 'enrolled' %}
                                                     <span class="badge bg-success">Записан</span>
-                                                {% elif enrollment.status == 'completed' %}
-                                                    <span class="badge bg-primary">Завершен</span>
+                                                {% elif data.enrollment.status == 'completed' %}
+                                                    <span class="badge bg-primary">Завершён</span>
                                                 {% else %}
-                                                    <span class="badge bg-secondary">{{ enrollment.status }}</span>
+                                                    <span class="badge bg-secondary">{{ data.enrollment.status }}</span>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ avg if avg > 0 else '-' }} баллов</td>
-                                            <td><strong>{{ letter if avg > 0 else '-' }}</strong></td>
                                             <td>
-                                                <a href="{{ url_for('course_detail', course_id=enrollment.course.id) }}" class="btn btn-sm btn-primary">Перейти</a>
+                                                {% if data.avg_grade %}
+                                                    {{ data.avg_grade }} баллов
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td><strong>{{ data.letter_grade }}</strong></td>
+                                            <td>
+                                                <a href="{{ url_for('course_detail', course_id=data.course.id) }}" class="btn btn-sm btn-primary">Перейти</a>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -104,7 +92,7 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Управление</a>
+                                                <a href="{{ url_for('course_students', course_id=course.id) }}" class="btn btn-sm btn-primary">Управление</a>
                                             </td>
                                         </tr>
                                         {% endfor %}

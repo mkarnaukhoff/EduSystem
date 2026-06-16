@@ -71,7 +71,7 @@
                                         <td>{{ item.title }}</td>
                                         <td><strong>{{ item.score }}</strong> баллов</td>
                                         <td>{{ item.graded_at.strftime('%d.%m.%Y') }}</td>
-                                        <td>{{ item.teacher.full_name if item.teacher else '-' }}</td>
+                                        <td>{{ item.grader_name if item.grader_name else '-' }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

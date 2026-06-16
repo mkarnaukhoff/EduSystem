@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <p><i class="fas fa-chalkboard-user"></i> <strong>Преподаватель:</strong> {{ course.teacher.full_name }}</p>
+                            <p><i class="fas fa-chalkboard-user"></i> <strong>Преподаватель:</strong> {{ teacher.full_name if teacher else course.teacher.full_name }}</p>
                             <p><i class="fas fa-clock"></i> <strong>Часов:</strong> {{ course.hours }}</p>
                         </div>
                         <div class="col-md-6">
@@ -46,7 +46,7 @@
                                                     <td>{{ item.title }}</td>
                                                     <td>{{ item.score }} баллов</td>
                                                     <td>{{ item.graded_at.strftime('%d.%m.%Y') }}</td>
-                                                    <td>{{ item.teacher.full_name if item.teacher else '-' }}</td>
+                                                    <td>{{ item.grader_name if item.grader_name else '-' }}</td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>

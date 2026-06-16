@@ -1,11 +1,6 @@
-# =============================================================================
-#  app.py — Информационная система образовательной организации «EduSystem»
-# =============================================================================
-
 import os
 from datetime import datetime
 from functools import wraps
-
 from flask import (
     Flask, render_template, request, redirect, url_for, flash, session
 )
@@ -20,11 +15,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-
-# =============================================================================
 #  МОДЕЛИ БАЗЫ ДАННЫХ
-# =============================================================================
-
 class User(db.Model):
     __tablename__ = 'users'
     id            = db.Column(db.Integer, primary_key=True)
@@ -122,11 +113,7 @@ class Announcement(db.Model):
     created_by   = db.Column(db.Integer, db.ForeignKey('users.id'))
     is_published = db.Column(db.Boolean, default=True)
 
-
-# =============================================================================
 #  ДЕКОРАТОРЫ
-# =============================================================================
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -150,11 +137,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
-# =============================================================================
 #  ПУБЛИЧНЫЕ МАРШРУТЫ
-# =============================================================================
-
 @app.route('/')
 def index():
     courses = Course.query.filter_by(is_active=True).limit(6).all()
@@ -173,10 +156,10 @@ def courses():
         query = query.filter(Course.name.contains(search) | Course.code.contains(search))
     return render_template('courses.html', courses=query.all())
 
-
 @app.route('/course/<int:course_id>')
 def course_detail(course_id):
     course = Course.query.get_or_404(course_id)
+    teacher = Teacher.query.get(course.teacher_id)  # Добавляем преподавателя
     is_enrolled = False
     grade_items = []
     final_grade = None
@@ -189,6 +172,14 @@ def course_detail(course_id):
             is_enrolled = enrollment is not None and enrollment.status == 'enrolled'
             if is_enrolled:
                 grade_items = GradeItem.query.filter_by(student_id=user.id, course_id=course_id).all()
+                # Добавляем имя преподавателя для каждой оценки
+                for item in grade_items:
+                    if item.graded_by:
+                        grader = User.query.get(item.graded_by)
+                        item.grader_name = grader.full_name if grader else 'Не указан'
+                    else:
+                        item.grader_name = 'Не указан'
+                
                 if grade_items:
                     total_score = sum(i.score * i.weight for i in grade_items)
                     total_weight = sum(i.weight for i in grade_items)
@@ -202,8 +193,13 @@ def course_detail(course_id):
                     else:
                         final_letter = 'Неудовлетворительно'
 
-    return render_template('course_detail.html', course=course, is_enrolled=is_enrolled,
-                           grade_items=grade_items, final_grade=final_grade, final_letter=final_letter)
+    return render_template('course_detail.html', 
+                           course=course, 
+                           teacher=teacher,  # Передаём преподавателя
+                           is_enrolled=is_enrolled,
+                           grade_items=grade_items, 
+                           final_grade=final_grade, 
+                           final_letter=final_letter)
 
 
 @app.route('/schedule')
@@ -212,16 +208,11 @@ def schedule():
     days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
     return render_template('schedule.html', schedules=schedules, days=days)
 
-
 @app.route('/teachers')
 def teachers():
     return render_template('teachers.html', teachers=Teacher.query.all())
 
-
-# =============================================================================
 #  АУТЕНТИФИКАЦИЯ
-# =============================================================================
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -261,7 +252,6 @@ def register():
 
     return render_template('auth.html', action='register')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -282,18 +272,13 @@ def login():
 
     return render_template('auth.html', action='login')
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('index'))
 
-
-# =============================================================================
 #  ЛИЧНЫЙ КАБИНЕТ
-# =============================================================================
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -337,11 +322,7 @@ def profile():
 
     return render_template('profile.html', user=user)
 
-
-# =============================================================================
 #  СТУДЕНТ
-# =============================================================================
-
 @app.route('/enroll/<int:course_id>', methods=['POST'])
 @login_required
 def enroll(course_id):
@@ -370,7 +351,41 @@ def my_courses():
 
     if user.role == 'student':
         enrollments = Enrollment.query.filter_by(student_id=user.id).all()
-        return render_template('my_courses.html', enrollments=enrollments)
+        
+        # Подготавливаем данные для каждого курса
+        courses_data = []
+        for enrollment in enrollments:
+            course = enrollment.course
+            grade_items = GradeItem.query.filter_by(
+                student_id=user.id, 
+                course_id=course.id
+            ).all()
+            
+            # Вычисляем средний балл
+            avg_grade = None
+            letter_grade = '-'
+            if grade_items:
+                total = sum(g.score for g in grade_items)
+                avg_grade = round(total / len(grade_items), 1)
+                
+                if avg_grade >= 85:
+                    letter_grade = 'Отлично'
+                elif avg_grade >= 70:
+                    letter_grade = 'Хорошо'
+                elif avg_grade >= 50:
+                    letter_grade = 'Удовлетворительно'
+                else:
+                    letter_grade = 'Неудовлетворительно'
+            
+            courses_data.append({
+                'course': course,
+                'enrollment': enrollment,
+                'avg_grade': avg_grade,
+                'letter_grade': letter_grade,
+                'teacher_name': course.teacher.full_name if course.teacher else 'Не указан'
+            })
+        
+        return render_template('my_courses.html', courses_data=courses_data)
 
     elif user.role == 'teacher':
         teacher = Teacher.query.filter_by(user_id=user.id).first()
@@ -389,6 +404,15 @@ def grades():
         return redirect(url_for('dashboard'))
 
     grade_items = GradeItem.query.filter_by(student_id=user.id).all()
+    
+    # Добавляем имя преподавателя для каждой оценки
+    for item in grade_items:
+        if item.graded_by:
+            grader = User.query.get(item.graded_by)
+            item.grader_name = grader.full_name if grader else 'Не указан'
+        else:
+            item.grader_name = 'Не указан'
+    
     course_summary = {}
 
     for item in grade_items:
@@ -413,11 +437,7 @@ def grades():
 
     return render_template('grades.html', grade_items=grade_items, course_summary=course_summary)
 
-
-# =============================================================================
 #  ПРЕПОДАВАТЕЛЬ
-# =============================================================================
-
 @app.route('/my_courses_teacher')
 @login_required
 def my_courses_teacher():
